@@ -1,3 +1,5 @@
+mod test;
+
 use std::{env, fs};
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -47,7 +49,12 @@ static TYPE : phf::Map<&'static str, &'static str> = phf_map! {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = &args[1];
-    let mut result: String = String::new();
+
+    run(file_path);
+}
+
+pub fn run(file_path: &str) {
+  let mut result: String = String::new();
 
     if let Ok(lines) = read_lines(file_path) {
         for ok_line in lines {
