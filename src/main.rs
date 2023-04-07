@@ -1,4 +1,5 @@
 mod test;
+mod vm;
 
 use std::{env, fs};
 use std::fs::File;
