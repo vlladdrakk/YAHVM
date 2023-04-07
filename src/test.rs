@@ -40,18 +40,18 @@ mod tests {
   #[test]
   fn it_sets() {
     let mut vm = vm::Vm::default();
-    vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
+    vm.instructions.push(String::from("000100000010000011")); // SET $0 0 -3
 
     vm.exec();
 
-    assert_eq!(vm.registers[0], 1);
+    assert_eq!(vm.registers[0], -3);
   }
 
   #[test]
   fn it_adds() {
     let mut vm = vm::Vm::default();
     vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
-    vm.instructions.push(String::from("00100000000000001")); // ADD $0 0 2
+    vm.instructions.push(String::from("001000000000000010")); // ADD $0 0 2
 
     vm.exec();
 
@@ -67,5 +67,16 @@ mod tests {
     vm.exec();
 
     assert_eq!(vm.output, String::from("output: 1"));
+  }
+
+  #[test]
+  fn it_subtracts() {
+    let mut vm = vm::Vm::default();
+    vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
+    vm.instructions.push(String::from("001100000000000010")); // SUB $0 0 2
+
+    vm.exec();
+
+    assert_eq!(vm.registers[0], -1);
   }
 }
