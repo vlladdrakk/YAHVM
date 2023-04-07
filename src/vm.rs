@@ -4,7 +4,10 @@ pub struct Vm {
   pc: usize,
   pub registers: [i8; 18],
   pub instructions: Vec<String>,
-  pub output: String
+  pub output: String,
+  pub jump: bool,
+  pub ticks: usize,
+  tick_limit: usize,
 }
 
 impl Vm {
@@ -13,10 +16,26 @@ impl Vm {
       pc: 0,
       registers: [0; 18],
       instructions: Vec::<String>::new(),
-      output: String::new()
+      output: String::new(),
+      jump: false,
+      ticks: 0,
+      tick_limit: usize::MAX
     };
 
     return vm
+  }
+
+  pub fn set_tick_limit(&mut self, limit: usize) {
+    self.tick_limit = limit;
+  }
+
+  pub fn print_state(&self) {
+    println!("pc: {}", self.pc);
+    println!("registers: {:?}", self.registers);
+    println!("instructions: {:?}", self.instructions);
+    println!("output: {}", self.output);
+    println!("jump: {}", self.jump);
+    println!("ticks: {}", self.ticks);
   }
 
   pub fn load_bin(&mut self, filename: &str) {
@@ -53,6 +72,12 @@ impl Vm {
       }
 
       self.pc += 1;
+      self.ticks += 1;
+
+      if self.ticks > self.tick_limit {
+        break;
+      }
+
       instruction = self.fetch();
     }
 
