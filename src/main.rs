@@ -189,6 +189,7 @@ fn process_line(line: String) -> String {
   // This leaves things open to having shorter versions of assembly instructions (ex: PRT $0)
   return match opcode {
     "PRT" => parse_print(line),
+    "SET" => parse_set(line),
     _ => ins.line_to_binary(line),
   }
 }
@@ -218,6 +219,22 @@ fn parse_print(line: String) -> String {
   }
 
   // Default
+  return ins.line_to_binary(line);
+}
+
+fn parse_set(line: String) -> String {
+  let parts: Vec<&str> = line.split(' ').collect();
+  let mut ins = Instruction::default();
+  ins.parse_opcode(parts[0]);
+
+  if parts.len() == 3 {
+    ins.parse_var(parts[1]);
+    ins.parse_type("0");
+    ins.parse_num(parts[2]);
+
+    return ins.as_binary();
+  }
+
   return ins.line_to_binary(line);
 }
 

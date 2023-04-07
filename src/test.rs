@@ -115,7 +115,7 @@ mod tests {
   }
 
   #[test]
-  fn it_prints_with_shortcuts() {
+  fn it_supports_print_shortform() {
     let mut vm = vm::Vm::default();
     run("test/print_test.asm", "out.bin");
     vm.load_bin("out.bin");
@@ -123,5 +123,19 @@ mod tests {
     vm.exec();
 
     assert_eq!(vm.output, "output: 12");
+  }
+
+  #[test]
+  fn it_supports_set_shortform() {
+    let mut vm = vm::Vm::default();
+    run("test/set_test.asm", "set_test.bin");
+    vm.load_bin("set_test.bin");
+
+    vm.exec();
+
+    assert_eq!(vm.registers[0], 9);
+    assert_eq!(vm.registers[1], 122);
+
+    fs::remove_file("set_test.bin").expect("unable to remove");
   }
 }
