@@ -177,21 +177,48 @@ pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
       }
   }
 
-  if Path::new("out.bin").exists() {
-    fs::remove_file("out.bin").expect("Unable to delete file");
-  }
-
-  fs::write("out.bin", result).expect("Unable to write file");
+  let mut file = File::create(output_path)?;
+  file.write_all(result.as_bytes())?;
+  file.sync_all()?;
+  Ok(())
 }
 
 fn process_line(line: String) -> String {
   let mut ins = Instruction::default();
-  ins.parse_opcode_from_line(line.clone());
-
+  let opcode = line.split(' ').collect::<Vec<&str>>()[0];
   // This leaves things open to having shorter versions of assembly instructions (ex: PRT $0)
-  return match ins.opcode {
+  return match opcode {
+    "PRT" => parse_print(line),
     _ => ins.line_to_binary(line),
   }
+}
+// Possible ways to use the print operation:
+// PRT $x => Just print the variable
+// PRT num => Directly print a number
+// PRT $x type num => The full version
+fn parse_print(line: String) -> String {
+  let parts: Vec<&str> = line.split(' ').collect();
+  let mut ins = Instruction::default();
+  ins.parse_opcode(parts[0]);
+
+  if parts.len() == 2 {
+    if parts[1].starts_with("$") {
+      ins.parse_var(parts[1]);
+      ins.parse_type("2");
+      ins.parse_num("0");
+
+      return ins.as_binary();
+    } else {
+      ins.parse_var("$0");
+      ins.parse_type("0");
+      ins.parse_num(parts[1]);
+
+      return ins.as_binary();
+    }
+  }
+
+  // Default
+  return ins.line_to_binary(line);
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {

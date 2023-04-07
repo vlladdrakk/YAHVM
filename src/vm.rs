@@ -95,7 +95,7 @@ impl Vm {
 
     match ins_type {
       "00" => {
-        let num = &instruction[10..18];
+        let num = i8::from_str_radix(&instruction[10..18], 2).unwrap();
         println!("output: {num}");
         self.output = String::from(format!("output: {num}"));
       },
