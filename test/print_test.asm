@@ -1,0 +1,7 @@
+SET $0 0 1
+SET $1 0 2
+SET $2 0 3
+PRT $0
+PRT $1 2 0
+PRT $2
+PRT 12

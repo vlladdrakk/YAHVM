@@ -1,9 +1,10 @@
 mod test;
 mod vm;
 
-use std::{env, fs};
+use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::io::prelude::*;
 use std::path::Path;
 use phf::{phf_map};
 
@@ -158,10 +159,10 @@ fn main() {
   let args: Vec<String> = env::args().collect();
   let file_path = &args[1];
 
-  run(file_path);
+  run(file_path, "out.bin");
 }
 
-pub fn run(file_path: &str) {
+pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
   let mut result: String = String::new();
 
   if let Ok(lines) = read_lines(file_path) {

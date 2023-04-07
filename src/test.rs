@@ -5,8 +5,8 @@ mod tests {
 
   #[test]
   fn it_assembles() {
-    run("example.asm");
-    let result = match fs::read_to_string("out.bin") {
+    run("test/basic_test.asm", "basic_test.bin");
+    let result = match fs::read_to_string("basic_test.bin") {
       Err(e) => {
         String::new()
       },
@@ -15,7 +15,7 @@ mod tests {
       }
     };
 
-    let correct_result = match fs::read_to_string("test/out.bin") {
+    let correct_result = match fs::read_to_string("test/basic_test.bin") {
       Err(e) => {
         println!("{e}");
         String::new()
@@ -26,13 +26,15 @@ mod tests {
       }
     };
 
-    assert_eq!(result, correct_result)
+    assert_eq!(result, correct_result);
+
+    fs::remove_file("basic_test.bin").expect("Unable to delete file");
   }
 
   #[test]
   fn it_loads_bin() {
     let mut vm = vm::Vm::default();
-    vm.load_bin("test/out.bin");
+    vm.load_bin("test/basic_test.bin");
 
     assert_eq!(vm.instructions.len(), 3);
   }
@@ -106,15 +108,20 @@ mod tests {
   fn it_jumps() {
     let mut vm = vm::Vm::default();
 
-    vm.set_tick_limit(15);
-
     vm.load_bin("test/jump_test.bin");
-    vm.print_state();
+    vm.exec();
+
+    assert_eq!(vm.registers[0], 0);
+  }
+
+  #[test]
+  fn it_prints_with_shortcuts() {
+    let mut vm = vm::Vm::default();
+    run("test/print_test.asm", "out.bin");
+    vm.load_bin("out.bin");
 
     vm.exec();
 
-    vm.print_state();
-
-    assert_eq!(vm.registers[0], 0);
+    assert_eq!(vm.output, "output: 12");
   }
 }
