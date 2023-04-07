@@ -79,4 +79,26 @@ mod tests {
 
     assert_eq!(vm.registers[0], -1);
   }
+
+  #[test]
+  fn it_multiplies() {
+    let mut vm = vm::Vm::default();
+    vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
+    vm.instructions.push(String::from("010000000000000010")); // MUL $0 0 2
+
+    vm.exec();
+
+    assert_eq!(vm.registers[0], 4);
+  }
+
+  #[test]
+  fn it_divides() {
+    let mut vm = vm::Vm::default();
+    vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
+    vm.instructions.push(String::from("010100000000000010")); // DIV $0 0 2
+
+    vm.exec();
+
+    assert_eq!(vm.registers[0], 1);
+  }
 }

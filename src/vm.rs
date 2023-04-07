@@ -131,11 +131,19 @@ impl Vm {
   }
 
   fn mul(&mut self, instruction: String) {
+    let var = &instruction[4..8];
+    let index = usize::from_str_radix(var, 2).unwrap();
+    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
+    self.registers[index] *= num;
   }
 
   fn div(&mut self, instruction: String) {
+    let var = &instruction[4..8];
+    let index = usize::from_str_radix(var, 2).unwrap();
+    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
+    self.registers[index] /= num;
   }
 
   fn jmp(&mut self, instruction: String) {
