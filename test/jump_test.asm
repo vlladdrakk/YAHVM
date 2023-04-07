@@ -6,4 +6,4 @@ JNP $0 0 9
 SET $0 0 11
 EQL $1 0 0
 JMP $0 0 3
-SET $0 0 0
+PRT $0 2 0
