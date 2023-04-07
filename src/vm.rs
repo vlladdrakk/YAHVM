@@ -167,7 +167,11 @@ impl Vm {
   fn jmp(&mut self, instruction: String) {
     if self.jump {
       let num = usize::from_str_radix(&instruction[11..18], 2).unwrap();
-      self.pc = num - 2;
+      if num < 2 {
+        self.pc = 0;
+      } else {
+        self.pc = num - 2;
+      }
     }
   }
 

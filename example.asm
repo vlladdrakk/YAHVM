@@ -17,6 +17,10 @@
 ; type => 0 1 2 3
 ;
 ; num => -127 to 127
+;
+; Labels => #label
+;
+; Used with JMP/JNP => JMP #label
 
 ; Example:
 

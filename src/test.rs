@@ -138,4 +138,17 @@ mod tests {
 
     fs::remove_file("set_test.bin").expect("unable to remove");
   }
+
+  #[test]
+  fn it_does_pabels() {
+    let mut vm = vm::Vm::default();
+    run("test/label_test.asm", "label_test.bin");
+    vm.load_bin("label_test.bin");
+
+    vm.exec();
+
+    assert_eq!(vm.output, "output: 5");
+
+    fs::remove_file("label_test.bin").expect("unable to remove");
+  }
 }

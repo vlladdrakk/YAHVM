@@ -6,7 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clippy = "0.0.302"
 phf = { version = "0.11", features = ["macros"] }
+regex = "1.7.3"
+substring = "1.4.5"
 
 [[bin]]
 name="rb18-asm"

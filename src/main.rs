@@ -1,12 +1,15 @@
 mod test;
 mod vm;
 
+use std::collections::HashMap;
 use std::env;
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{BufRead, BufReader};
 use std::io::prelude::*;
 use std::path::Path;
 use phf::{phf_map};
+use regex::Regex;
+use substring::Substring;
 
 static OPCODES : phf::Map<&'static str, &'static str> = phf_map! {
   "PRT" => "0000",
@@ -164,17 +167,38 @@ fn main() {
 
 pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
   let mut result: String = String::new();
+  let mut label_table = HashMap::new();
+  let mut current_line: i32 = 0;
+  let re = Regex::new(r"\#\w+").unwrap();
 
-  if let Ok(lines) = read_lines(file_path) {
-      for ok_line in lines {
-          if let Ok(mut line) = ok_line {
-              line = line.trim().to_string();
-              if !line.starts_with(';') && line.len() > 0 {
-                  result.push_str(&process_line(line));
-                  result.push_str("\n");
-              }
-          }
-      }
+  let lines = lines_from_file(file_path);
+  let mut pre_replacement: Vec<String> = Vec::new();
+  let mut pre_assembled: Vec<String> = Vec::new();
+
+  // First pass creates the label table
+  for line in &lines {
+    if line.starts_with('#') {
+      label_table.insert(line, current_line);
+    } else if !line.starts_with(';') && line.len() > 0 {
+      pre_replacement.push(line.to_string());
+      current_line += 1;
+    }
+  }
+
+  for line in &pre_replacement {
+    let mut l: String = line.clone();
+    for mat in re.find_iter(&line) {
+      let label: String = line.substring(mat.start(), mat.end()).to_string();
+      let line_num = label_table.get(&label).unwrap() + 1;
+
+      l = l.replace(&label, line_num.to_string().as_str());
+    }
+    pre_assembled.push(l);
+  }
+
+  for line in pre_assembled {
+    result.push_str(&process_line(line));
+    result.push_str("\n");
   }
 
   let mut file = File::create(output_path)?;
@@ -190,6 +214,7 @@ fn process_line(line: String) -> String {
   return match opcode {
     "PRT" => parse_print(line),
     "SET" => parse_set(line),
+    "JMP" => parse_jmp(line),
     _ => ins.line_to_binary(line),
   }
 }
@@ -238,7 +263,26 @@ fn parse_set(line: String) -> String {
   return ins.line_to_binary(line);
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
-  let file = File::open(filename)?;
-  Ok(io::BufReader::new(file).lines())
+fn parse_jmp(line: String) -> String {
+  let parts: Vec<&str> = line.split(' ').collect();
+  let mut ins = Instruction::default();
+  ins.parse_opcode(parts[0]);
+
+  if parts.len() == 2 {
+    ins.parse_var("$0");
+    ins.parse_type("0");
+    ins.parse_num(parts[1]);
+
+    return ins.as_binary();
+  }
+
+  return ins.line_to_binary(line);
+}
+
+fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
+  let file = File::open(filename).expect("no such file");
+  let buf = BufReader::new(file);
+  buf.lines()
+      .map(|l| l.expect("Could not parse line").trim().to_string())
+      .collect()
 }
