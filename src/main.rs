@@ -176,6 +176,10 @@ pub fn run(file_path: &str) {
       }
   }
 
+  if Path::new("out.bin").exists() {
+    fs::remove_file("out.bin").expect("Unable to delete file");
+  }
+
   fs::write("out.bin", result).expect("Unable to write file");
 }
 

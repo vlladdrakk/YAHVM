@@ -32,7 +32,7 @@ mod tests {
   #[test]
   fn it_loads_bin() {
     let mut vm = vm::Vm::default();
-    vm.load_bin("out.bin");
+    vm.load_bin("test/out.bin");
 
     assert_eq!(vm.instructions.len(), 3);
   }
@@ -100,5 +100,21 @@ mod tests {
     vm.exec();
 
     assert_eq!(vm.registers[0], 1);
+  }
+
+  #[test]
+  fn it_jumps() {
+    let mut vm = vm::Vm::default();
+
+    vm.set_tick_limit(15);
+
+    vm.load_bin("test/jump_test.bin");
+    vm.print_state();
+
+    vm.exec();
+
+    vm.print_state();
+
+    assert_eq!(vm.registers[0], 0);
   }
 }

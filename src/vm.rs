@@ -50,11 +50,9 @@ impl Vm {
 
   pub fn exec(&mut self) {
     let mut instruction = self.fetch();
-    println!("instruction: {instruction}");
 
     while instruction != String::from("null") {
       let opcode = &instruction[0..4];
-      println!("opcode: {opcode}");
 
       match opcode {
         "0000" => self.prt(instruction),
@@ -134,8 +132,6 @@ impl Vm {
       num = num * -1;
     }
 
-    println!("index: {index}, num: {num}");
-
     self.registers[index] = num;
   }
 
@@ -172,22 +168,40 @@ impl Vm {
   }
 
   fn jmp(&mut self, instruction: String) {
-
+    if self.jump {
+      let num = usize::from_str_radix(&instruction[11..18], 2).unwrap();
+      self.pc = num - 2;
+    }
   }
 
   fn jnp(&mut self, instruction: String) {
-
+    if !self.jump {
+      let num = usize::from_str_radix(&instruction[11..18], 2).unwrap();
+      self.pc = num - 2;
+    }
   }
 
   fn eql(&mut self, instruction: String) {
+    let var = &instruction[4..8];
+    let index = usize::from_str_radix(var, 2).unwrap();
+    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
+    self.jump = self.registers[index] == num;
   }
 
   fn cbp(&mut self, instruction: String) {
+    let var = &instruction[4..8];
+    let index = usize::from_str_radix(var, 2).unwrap();
+    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
+    self.jump = self.registers[index] > num;
   }
 
   fn clp(&mut self, instruction: String) {
+    let var = &instruction[4..8];
+    let index = usize::from_str_radix(var, 2).unwrap();
+    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
+    self.jump = self.registers[index] < num;
   }
 }
