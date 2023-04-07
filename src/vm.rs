@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, fs};
 
 pub struct Vm {
   pc: usize,
@@ -83,7 +83,6 @@ impl Vm {
 
   // Returns the next instruction
   fn fetch(&self) -> String {
-    println!("pc: {}", self.pc);
     if self.pc == self.instructions.len() {
       return String::from("null");
     }
@@ -93,8 +92,6 @@ impl Vm {
 
   fn prt(&mut self, instruction: String) {
     let ins_type = &instruction[8..10];
-
-    println!("type: {ins_type}");
 
     match ins_type {
       "00" => {
@@ -204,4 +201,13 @@ impl Vm {
 
     self.jump = self.registers[index] < num;
   }
+}
+
+fn main() {
+  let args: Vec<String> = env::args().collect();
+  let file_path = &args[1];
+  let mut vm = Vm::default();
+
+  vm.load_bin(file_path);
+  vm.exec();
 }
