@@ -71,42 +71,12 @@ impl Instruction {
     self.opcode = String::from(OPCODES[opcode]);
   }
 
-  fn parse_opcode_from_line(&mut self, line: String) {
-    let parts: Vec<&str> = line.split(' ').collect();
-
-    if parts.len() > 0 {
-      self.parse_opcode(parts[0]);
-    } else {
-      println!("ERROR: Provided line didn't contain any opcode");
-    }
-  }
-
   fn parse_var(&mut self, var: &str) {
     self.var = String::from(VARS[&var.to_lowercase()]);
   }
 
-  fn parse_var_from_line(&mut self, line: String) {
-    let parts: Vec<&str> = line.split(' ').collect();
-
-    if parts.len() > 1 {
-      self.parse_var(parts[1]);
-    } else {
-      println!("ERROR: Provided line didn't contain any var");
-    }
-  }
-
   fn parse_type(&mut self, raw_type: &str) {
     self.ins_type = String::from(TYPE[raw_type]);
-  }
-
-  fn parse_type_from_line(&mut self, line: String) {
-    let parts: Vec<&str> = line.split(' ').collect();
-
-    if parts.len() > 2 {
-      self.parse_type(parts[2]);
-    } else {
-      println!("ERROR: Provided line didn't contain any type");
-    }
   }
 
   fn parse_num(&mut self, num: &str) {
@@ -119,16 +89,6 @@ impl Instruction {
     number.push_str(&format!("{:08b}", num.parse::<i32>().unwrap()));
 
     self.num = number;
-  }
-
-  fn parse_num_from_line(&mut self, line: String) {
-    let parts: Vec<&str> = line.split(' ').collect();
-
-    if parts.len() > 1 {
-      self.parse_num(parts[3]);
-    } else {
-      println!("ERROR: Provided line didn't contain any num");
-    }
   }
 
   fn parse(&mut self, line: String) {
