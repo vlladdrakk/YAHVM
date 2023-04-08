@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "RD-18"
+name = "YAHVM"
 version = "0.1.0"
 dependencies = [
  "clippy",

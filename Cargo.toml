@@ -1,5 +1,5 @@
 [package]
-name = "RD-18"
+name = "YAHVM"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,9 +12,9 @@ regex = "1.7.3"
 substring = "1.4.5"
 
 [[bin]]
-name="rb18-asm"
+name="yahvm-asm"
 path="src/main.rs"
 
 [[bin]]
-name="rb18"
+name="yahvm"
 path="src/vm.rs"
