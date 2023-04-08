@@ -140,13 +140,6 @@ impl Instruction {
     self.parse_num(parts[3]);
   }
 
-  fn parse_from_vec(&mut self, parts: Vec<&str>) {
-    self.parse_opcode(parts[0]);
-    self.parse_var(parts[1]);
-    self.parse_type(parts[2]);
-    self.parse_num(parts[3]);
-  }
-
   fn as_binary(&self) -> String {
     return String::from(format!("{}{}{}{}", self.opcode, self.var, self.ins_type, self.num));
   }
@@ -162,7 +155,7 @@ fn main() {
   let args: Vec<String> = env::args().collect();
   let file_path = &args[1];
 
-  run(file_path, "out.bin");
+  run(file_path, "out.bin").unwrap();
 }
 
 pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
@@ -210,11 +203,20 @@ pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
 fn process_line(line: String) -> String {
   let mut ins = Instruction::default();
   let opcode = line.split(' ').collect::<Vec<&str>>()[0];
-  // This leaves things open to having shorter versions of assembly instructions (ex: PRT $0)
+
+  // Handle all possibilities of short forms
   return match opcode {
-    "PRT" => parse_print(line),
-    "SET" => parse_set(line),
-    "JMP" => parse_jmp(line),
+    "PRT" => parse_just_var_or_num(line),
+    "SET" => parse_no_type(line),
+    "JMP" => parse_just_num(line),
+    "JNP" => parse_just_num(line),
+    "ADD" => parse_no_type(line),
+    "SUB" => parse_no_type(line),
+    "MUL" => parse_no_type(line),
+    "DIV" => parse_no_type(line),
+    "EQL" => parse_no_type(line),
+    "CBP" => parse_no_type(line),
+    "CLP" => parse_no_type(line),
     _ => ins.line_to_binary(line),
   }
 }
@@ -222,7 +224,7 @@ fn process_line(line: String) -> String {
 // PRT $x => Just print the variable
 // PRT num => Directly print a number
 // PRT $x type num => The full version
-fn parse_print(line: String) -> String {
+fn parse_just_var_or_num(line: String) -> String {
   let parts: Vec<&str> = line.split(' ').collect();
   let mut ins = Instruction::default();
   ins.parse_opcode(parts[0]);
@@ -247,23 +249,7 @@ fn parse_print(line: String) -> String {
   return ins.line_to_binary(line);
 }
 
-fn parse_set(line: String) -> String {
-  let parts: Vec<&str> = line.split(' ').collect();
-  let mut ins = Instruction::default();
-  ins.parse_opcode(parts[0]);
-
-  if parts.len() == 3 {
-    ins.parse_var(parts[1]);
-    ins.parse_type("0");
-    ins.parse_num(parts[2]);
-
-    return ins.as_binary();
-  }
-
-  return ins.line_to_binary(line);
-}
-
-fn parse_jmp(line: String) -> String {
+fn parse_just_num(line: String) -> String {
   let parts: Vec<&str> = line.split(' ').collect();
   let mut ins = Instruction::default();
   ins.parse_opcode(parts[0]);
@@ -272,6 +258,22 @@ fn parse_jmp(line: String) -> String {
     ins.parse_var("$0");
     ins.parse_type("0");
     ins.parse_num(parts[1]);
+
+    return ins.as_binary();
+  }
+
+  return ins.line_to_binary(line);
+}
+
+fn parse_no_type(line: String) -> String {
+  let parts: Vec<&str> = line.split(' ').collect();
+  let mut ins = Instruction::default();
+  ins.parse_opcode(parts[0]);
+
+  if parts.len() == 3 {
+    ins.parse_var(parts[1]);
+    ins.parse_type("0");
+    ins.parse_num(parts[2]);
 
     return ins.as_binary();
   }
