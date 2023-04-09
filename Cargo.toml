@@ -1,5 +1,5 @@
 [package]
-name = "YAHVM"
+name = "yahvm"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,6 +11,9 @@ phf = { version = "0.11", features = ["macros"] }
 regex = "1.7.3"
 substring = "1.4.5"
 
+[dev-dependencies]
+criterion = "0.3"
+
 [[bin]]
 name="yahvm-asm"
 path="src/main.rs"
@@ -18,3 +21,7 @@ path="src/main.rs"
 [[bin]]
 name="yahvm"
 path="src/vm.rs"
+
+[[bench]]
+name = "benchmark"
+harness = false
