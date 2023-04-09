@@ -1,8 +1,8 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use yahvm::vm;
+use yahvm::vm::Vm;
 
 fn run_vm(filename: &str) {
-  let mut vm = vm::Vm::default();
+  let mut vm = Vm::new();
   vm.load_bin(filename);
   vm.exec();
 }

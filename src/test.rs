@@ -1,13 +1,25 @@
+#[warn(unused_must_use)]
+
 #[cfg(test)]
 mod tests {
   use std::fs;
   use crate::*;
 
+  fn compile(filname: &str, output_name: &str) {
+    match run(filname, output_name) {
+      Ok(_) => {},
+      Err(e) => {
+        println!("Failed to compile: {e}");
+      }
+    };
+  }
+
   #[test]
   fn it_assembles() {
-    run("test/basic_test.asm", "basic_test.bin");
+    compile("test/basic_test.asm", "basic_test.bin");
+
     let result = match fs::read_to_string("basic_test.bin") {
-      Err(e) => {
+      Err(_) => {
         String::new()
       },
       Ok(val) => {
@@ -33,7 +45,7 @@ mod tests {
 
   #[test]
   fn it_loads_bin() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.load_bin("test/basic_test.bin");
 
     assert_eq!(vm.instructions.len(), 3);
@@ -41,7 +53,7 @@ mod tests {
 
   #[test]
   fn it_sets() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000010000011")); // SET $0 0 -3
 
     vm.exec();
@@ -51,7 +63,7 @@ mod tests {
 
   #[test]
   fn it_adds() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
     vm.instructions.push(String::from("001000000000000010")); // ADD $0 0 2
 
@@ -62,7 +74,7 @@ mod tests {
 
   #[test]
   fn it_prints() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
     vm.instructions.push(String::from("000000001000000000")); // PRT $0 2 0
 
@@ -73,7 +85,7 @@ mod tests {
 
   #[test]
   fn it_subtracts() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
     vm.instructions.push(String::from("001100000000000010")); // SUB $0 0 2
 
@@ -84,7 +96,7 @@ mod tests {
 
   #[test]
   fn it_multiplies() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
     vm.instructions.push(String::from("010000000000000010")); // MUL $0 0 2
 
@@ -95,7 +107,7 @@ mod tests {
 
   #[test]
   fn it_divides() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
     vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
     vm.instructions.push(String::from("010100000000000010")); // DIV $0 0 2
 
@@ -106,7 +118,7 @@ mod tests {
 
   #[test]
   fn it_jumps() {
-    let mut vm = vm::Vm::default();
+    let mut vm = vm::Vm::new();
 
     vm.load_bin("test/jump_test.bin");
     vm.exec();
@@ -116,10 +128,16 @@ mod tests {
 
   #[test]
   fn it_supports_print_shortform() {
-    let mut vm = vm::Vm::default();
-    run("test/print_test.asm", "out.bin");
-    vm.load_bin("out.bin");
+    let mut vm = vm::Vm::new();
 
+    match run("test/print_test.asm", "out.bin") {
+      Ok(_) => {},
+      Err(e) => {
+        println!("Failed to compile: {e}");
+      }
+    }
+
+    vm.load_bin("out.bin");
     vm.exec();
 
     assert_eq!(vm.output, "output: 12");
@@ -127,8 +145,8 @@ mod tests {
 
   #[test]
   fn it_supports_set_shortform() {
-    let mut vm = vm::Vm::default();
-    run("test/set_test.asm", "set_test.bin");
+    let mut vm = vm::Vm::new();
+    compile("test/set_test.asm", "set_test.bin");
     vm.load_bin("set_test.bin");
 
     vm.exec();
@@ -141,8 +159,8 @@ mod tests {
 
   #[test]
   fn it_does_pabels() {
-    let mut vm = vm::Vm::default();
-    run("test/label_test.asm", "label_test.bin");
+    let mut vm = vm::Vm::new();
+    compile("test/label_test.asm", "label_test.bin");
     vm.load_bin("label_test.bin");
 
     vm.exec();
