@@ -125,6 +125,15 @@ impl Vm {
     let mut num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
     let sign = instruction.chars().nth(10).unwrap();
 
+    if ins_type == "01" {
+      if num > 15 || num < 0 {
+        panic!("Register index out of bounds");
+      }
+
+      self.registers[index] = self.registers[num as usize];
+      return;
+    }
+
     if sign == '1' {
       num = num * -1;
     }
@@ -136,6 +145,16 @@ impl Vm {
     let var = &instruction[4..8];
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let ins_type = &instruction[8..10];
+
+    if ins_type == "01" {
+      if num > 15 {
+        panic!("Register index out of bounds");
+      }
+
+      self.registers[index] += self.registers[num as usize];
+      return;
+    }
 
     self.registers[index] += num;
   }
@@ -144,6 +163,16 @@ impl Vm {
     let var = &instruction[4..8];
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let ins_type = &instruction[8..10];
+
+    if ins_type == "01" {
+      if num > 15 {
+        panic!("Register index out of bounds");
+      }
+
+      self.registers[index] = self.registers[index] - self.registers[num as usize];
+      return;
+    }
 
     self.registers[index] -= num;
   }
@@ -152,6 +181,16 @@ impl Vm {
     let var = &instruction[4..8];
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let ins_type = &instruction[8..10];
+
+    if ins_type == "01" {
+      if num > 15 {
+        panic!("Register index out of bounds");
+      }
+
+      self.registers[index] *= self.registers[num as usize];
+      return;
+    }
 
     self.registers[index] *= num;
   }
@@ -160,6 +199,17 @@ impl Vm {
     let var = &instruction[4..8];
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let ins_type = &instruction[8..10];
+
+    if ins_type == "01" {
+      if num > 15 {
+        panic!("Register index out of bounds");
+      }
+
+      self.registers[index] /= self.registers[num as usize];
+      return;
+    }
+
 
     self.registers[index] /= num;
   }

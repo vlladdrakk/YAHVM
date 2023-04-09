@@ -1,0 +1,10 @@
+SET $0 1
+SET $1 2
+ADD $1 $0
+SET $2 8
+SUB $2 $1
+SET $3 10
+DIV $3 $2
+SET $4 4
+MUL $4 $3
+SET $5 $0

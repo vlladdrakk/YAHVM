@@ -16,6 +16,9 @@ Set the value of a variable
 ```
 SET $1 0 12 ; Sets $1 to 12
 SET $1 12 ; Short form
+
+SET $1 1 8 ; Sets $1 to the value in $8
+SET $1 $8 ; Short form
 ```
 
 ## ADD (0011)
@@ -24,6 +27,9 @@ Add a number to a variable
 ```
 ADD $0 0 1 ; Add 1 to variable $0
 ADD $0 1 ; Short form
+
+ADD $0 1 $1 ; Add $1 to $0 and store in $0
+ADD $0 $1 ; Short form
 ```
 
 ## SUB (0100)
@@ -32,6 +38,9 @@ Subtract a number from a variable
 ```
 SUB $0 0 1 ; Subtract 1 from variable $0
 SUB $0 1 ; Short form
+
+SUB $0 1 $1 ; Subtract $1 from $0 and store in $0
+SUB $0 $1 ; Short form
 ```
 
 ## MUL (0101)
@@ -40,6 +49,9 @@ Multiply a variable by a number
 ```
 MUL $0 0 2 ; Multiply variable $0 by 2
 MUL $0 2 ; Short form
+
+MUL $0 1 $1 ; Multiply $1 and $0 and store in $0
+MUL $0 $1 ; Short form
 ```
 
 ## DIV (0110)
@@ -48,6 +60,9 @@ Divide a variable by a number
 ```
 DIV $0 0 2 ; Divide variable $0 by 2
 DIV $0 2 ; Short form
+
+DIV $0 1 $1 ; Divide $1 by $0 and store in $0
+DIV $0 $1 ; Short form
 ```
 
 ## JMP (0111)

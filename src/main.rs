@@ -91,6 +91,10 @@ impl Instruction {
     self.num = number;
   }
 
+  fn parse_num_as_var(&mut self, num: &str) {
+    self.num = format!("0000{}", String::from(VARS[num]));
+  }
+
   fn parse(&mut self, line: String) {
     let parts: Vec<&str> = line.split(' ').collect();
 
@@ -233,7 +237,14 @@ fn parse_no_type(line: String) -> String {
   if parts.len() == 3 {
     ins.parse_var(parts[1]);
     ins.parse_type("0");
-    ins.parse_num(parts[2]);
+
+    if parts[2].starts_with("$") {
+      ins.parse_type("1");
+      ins.parse_num_as_var(parts[2]);
+    } else {
+      ins.parse_type("0");
+      ins.parse_num(parts[2]);
+    }
 
     return ins.as_binary();
   }

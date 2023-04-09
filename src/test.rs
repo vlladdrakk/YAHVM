@@ -151,4 +151,21 @@ mod tests {
 
     fs::remove_file("label_test.bin").expect("unable to remove");
   }
+
+  #[test]
+  fn it_uses_extensions() {
+    let mut vm = vm::Vm::default();
+    run("test/extension_test.asm", "extension_test.bin");
+    vm.load_bin("extension_test.bin");
+
+    vm.exec();
+
+    assert_eq!(vm.registers[1], 3);
+    assert_eq!(vm.registers[2], 5);
+    assert_eq!(vm.registers[3], 2);
+    assert_eq!(vm.registers[4], 8);
+    assert_eq!(vm.registers[5], 1);
+
+    fs::remove_file("extension_test.bin").expect("unable to remove");
+  }
 }
