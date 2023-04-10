@@ -172,8 +172,8 @@ mod tests {
 
   #[test]
   fn it_uses_extensions() {
-    let mut vm = vm::Vm::default();
-    run("test/extension_test.asm", "extension_test.bin");
+    let mut vm = vm::Vm::new();
+    compile("test/extension_test.asm", "extension_test.bin");
     vm.load_bin("extension_test.bin");
 
     vm.exec();
