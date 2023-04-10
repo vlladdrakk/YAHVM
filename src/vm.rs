@@ -11,8 +11,8 @@ pub struct Vm {
 }
 
 impl Vm {
-  pub fn default() -> Vm {
-    let vm = Vm {
+  pub fn new() -> Self {
+    Self {
       pc: 0,
       registers: [0; 18],
       instructions: Vec::<String>::new(),
@@ -20,9 +20,7 @@ impl Vm {
       jump: false,
       ticks: 0,
       tick_limit: usize::MAX
-    };
-
-    return vm
+    }
   }
 
   pub fn set_tick_limit(&mut self, limit: usize) {
@@ -114,7 +112,7 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let ins_type = &instruction[8..10];
 
-    let var_type = match ins_type {
+    let _var_type = match ins_type {
       "00" => "int",
       "01" => "float",
       "10" => "var_pointer",
@@ -257,10 +255,11 @@ impl Vm {
   }
 }
 
+#[allow(dead_code)]
 fn main() {
   let args: Vec<String> = env::args().collect();
   let file_path = &args[1];
-  let mut vm = Vm::default();
+  let mut vm = Vm::new();
 
   vm.load_bin(file_path);
   vm.exec();
