@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+DEBUG = ENV["DEBUG"] == "true" || ENV["DEBUG"].to_i == 1
+
+OPERATORS = {
+  1 => "PRT",
+  2 => "SET",
+  3 => "ADD",
+  4 => "SUB",
+  5 => "MUL",
+  6 => "DIV",
+  7 => "JMP",
+  8 => "JNP",
+  9 => "EQL",
+  10 => "CBP",
+  11 => "CLP",
+}
+
+filename = ARGV[0]
+
+if filename.nil?
+  puts "Usage: bin_to_asm filename"
+  exit
+end
+
+file = File.read(filename)
+file.unpack("L*").each do |row|
+  row = row & 0b111111111111111111 # ARGH - get rid of 14-bit padding
+  # 4-4-2-8
+  op = row >> 14
+  var = (row >> 10) & 0b1111
+  var_type = (row >> 8) & 0b11
+  num = row & 0b11111111
+
+  puts "#{OPERATORS[op]} $#{var} #{var_type} #{num}"
+end

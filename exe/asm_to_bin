@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+DEBUG = ENV["DEBUG"] == "true" || ENV["DEBUG"].to_i == 1
+
+OPERATORS = DEBUG ? {
+  "PRT" => "0001",
+  "SET" => "0010",
+  "ADD" => "0011",
+  "SUB" => "0100",
+  "MUL" => "0101",
+  "DIV" => "0110",
+  "JMP" => "0111",
+  "JNP" => "1000",
+  "EQL" => "1001",
+  "CBP" => "1010",
+  "CLP" => "1011",
+} : {
+  "PRT" => 1,
+  "SET" => 2,
+  "ADD" => 3,
+  "SUB" => 4,
+  "MUL" => 5,
+  "DIV" => 6,
+  "JMP" => 7,
+  "JNP" => 8,
+  "EQL" => 9,
+  "CBP" => 10,
+  "CLP" => 11,
+}
+
+filename = ARGV[0]
+
+if filename.nil?
+  puts "Usage: asm_to_bin filename"
+  exit
+end
+
+file = File.read(filename)
+bytes = []
+
+file.split("\n").each do |line|
+  next if line.start_with?(";") || line.empty?
+  tokens = line.split(" ")
+  op = tokens[0]
+  var = tokens[1]
+  var_type = tokens[2]
+  num = tokens[3]
+
+  if DEBUG
+    print(OPERATORS[op])
+    print(var[1].to_i(16).to_s(2).rjust(4, "0"))
+    print(var_type.to_i.to_s(2).rjust(2, "0"))
+    print(num.to_i.to_s(2).rjust(8, "0"))
+    print("\n")
+  else
+    row = OPERATORS[op]
+    row = row << 4 | var[1].to_i(16)
+    row = row << 2 | var_type.to_i
+    row = row << 8 | num.to_i
+    bytes.push(row)
+  end
+end
+
+if DEBUG == false
+  print(bytes.pack("L*"))
+end
