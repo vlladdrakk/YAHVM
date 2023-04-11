@@ -16,7 +16,7 @@ criterion = "0.3"
 
 [[bin]]
 name="yahvm-asm"
-path="src/main.rs"
+path="src/assembler.rs"
 
 [[bin]]
 name="yahvm"
