@@ -20,7 +20,7 @@ path="src/main.rs"
 
 [[bin]]
 name="yahvm"
-path="src/vm.rs"
+path="src/vm_runner.rs"
 
 [[bench]]
 name = "benchmark"

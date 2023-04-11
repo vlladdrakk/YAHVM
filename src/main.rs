@@ -1,5 +1,4 @@
 mod test;
-mod vm;
 
 use std::collections::HashMap;
 use std::env;

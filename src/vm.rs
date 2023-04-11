@@ -1,8 +1,11 @@
-use std::{env, fs};
+mod var;
+
+use std::{fs};
+use var::Var;
 
 pub struct Vm {
   pc: usize,
-  pub registers: [i8; 18],
+  pub registers: [Var; 18],
   pub instructions: Vec<String>,
   pub output: String,
   pub jump: bool,
@@ -14,7 +17,7 @@ impl Vm {
   pub fn default() -> Vm {
     let vm = Vm {
       pc: 0,
-      registers: [0; 18],
+      registers: [Var::Integer(0); 18],
       instructions: Vec::<String>::new(),
       output: String::new(),
       jump: false,
@@ -25,18 +28,18 @@ impl Vm {
     return vm
   }
 
-  pub fn set_tick_limit(&mut self, limit: usize) {
-    self.tick_limit = limit;
-  }
+  // pub fn set_tick_limit(&mut self, limit: usize) {
+  //   self.tick_limit = limit;
+  // }
 
-  pub fn print_state(&self) {
-    println!("pc: {}", self.pc);
-    println!("registers: {:?}", self.registers);
-    println!("instructions: {:?}", self.instructions);
-    println!("output: {}", self.output);
-    println!("jump: {}", self.jump);
-    println!("ticks: {}", self.ticks);
-  }
+  // pub fn print_state(&self) {
+  //   println!("pc: {}", self.pc);
+  //   println!("registers: {:?}", self.registers);
+  //   println!("instructions: {:?}", self.instructions);
+  //   println!("output: {}", self.output);
+  //   println!("jump: {}", self.jump);
+  //   println!("ticks: {}", self.ticks);
+  // }
 
   pub fn load_bin(&mut self, filename: &str) {
     let data = match fs::read_to_string(filename) {
@@ -90,6 +93,24 @@ impl Vm {
     return String::from(&self.instructions[self.pc]);
   }
 
+  fn instruction_value(&mut self, instruction: &str) -> Var {
+    let ins_type = &instruction[8..10];
+
+    match ins_type {
+      "00" => Var::Integer(
+        i8::from_str_radix(&instruction[11..18], 2).unwrap()
+      ),
+      "01" => Var::Float(
+        // TODO: implement Float
+        i8::from_str_radix(&instruction[11..18], 2).unwrap() as f32
+      ),
+      "10" => self.registers[
+        i8::from_str_radix(&instruction[11..18], 2).unwrap() as usize
+      ],
+      _ => Var::Integer(0),
+    }
+  }
+
   fn prt(&mut self, instruction: String) {
     let ins_type = &instruction[8..10];
 
@@ -114,14 +135,16 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let ins_type = &instruction[8..10];
 
-    let var_type = match ins_type {
-      "00" => "int",
-      "01" => "float",
-      "10" => "var_pointer",
-      "11" => "func_pointer",
-      _ => ""
+    match ins_type {
+      "00" => self.set_integer(index, instruction),
+      "01" => self.set_float(index, instruction),
+      "10" => self.set_with_variable(index, instruction),
+      // "11" => "func_pointer",
+      _ => (),
     };
+  }
 
+  fn set_integer(&mut self, index: usize, instruction: String) {
     let mut num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
     let sign = instruction.chars().nth(10).unwrap();
 
@@ -129,7 +152,26 @@ impl Vm {
       num = num * -1;
     }
 
-    self.registers[index] = num;
+    self.registers[index] = Var::Integer(num);
+  }
+
+  fn set_float(&mut self, index: usize, instruction: String) {
+    // TODO: implement this
+    let mut num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let sign = instruction.chars().nth(10).unwrap();
+
+    if sign == '1' {
+      num = num * -1;
+    }
+
+    self.registers[index] = Var::Float(num as f32);
+  }
+
+  fn set_with_variable(&mut self, index: usize, instruction: String) {
+    let source_var_str = &instruction[11..18];
+    let source_var = usize::from_str_radix(source_var_str, 2).unwrap();
+
+    self.registers[index] = self.registers[source_var];
   }
 
   fn add(&mut self, instruction: String) {
@@ -137,7 +179,10 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.registers[index] += num;
+    self.registers[index] = match self.registers[index] {
+      Var::Integer(i) => Var::Integer(i + num),
+      Var::Float(f) => Var::Float(f + num as f32),
+    }
   }
 
   fn sub(&mut self, instruction: String) {
@@ -145,7 +190,10 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.registers[index] -= num;
+    self.registers[index] = match self.registers[index] {
+      Var::Integer(i) => Var::Integer(i - num),
+      Var::Float(f) => Var::Float(f - num as f32),
+    }
   }
 
   fn mul(&mut self, instruction: String) {
@@ -153,7 +201,10 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.registers[index] *= num;
+    self.registers[index] = match self.registers[index] {
+      Var::Integer(i) => Var::Integer(i * num),
+      Var::Float(f) => Var::Float(f * num as f32),
+    }
   }
 
   fn div(&mut self, instruction: String) {
@@ -161,7 +212,10 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.registers[index] /= num;
+    self.registers[index] = match self.registers[index] {
+      Var::Integer(i) => Var::Integer(i / num),
+      Var::Float(f) => Var::Float(f / num as f32),
+    }
   }
 
   fn jmp(&mut self, instruction: String) {
@@ -185,9 +239,9 @@ impl Vm {
   fn eql(&mut self, instruction: String) {
     let var = &instruction[4..8];
     let index = usize::from_str_radix(var, 2).unwrap();
-    let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
+    let other_value = self.instruction_value(&instruction);
 
-    self.jump = self.registers[index] == num;
+    self.jump = self.registers[index] == other_value;
   }
 
   fn cbp(&mut self, instruction: String) {
@@ -195,7 +249,10 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.jump = self.registers[index] > num;
+    self.jump = match self.registers[index] {
+      Var::Integer(i) => i > num,
+      Var::Float(f) => f > num as f32,
+    }
   }
 
   fn clp(&mut self, instruction: String) {
@@ -203,15 +260,9 @@ impl Vm {
     let index = usize::from_str_radix(var, 2).unwrap();
     let num = i8::from_str_radix(&instruction[11..18], 2).unwrap();
 
-    self.jump = self.registers[index] < num;
+    self.jump = match self.registers[index] {
+      Var::Integer(i) => i < num,
+      Var::Float(f) => f < num as f32,
+    }
   }
-}
-
-fn main() {
-  let args: Vec<String> = env::args().collect();
-  let file_path = &args[1];
-  let mut vm = Vm::default();
-
-  vm.load_bin(file_path);
-  vm.exec();
 }
