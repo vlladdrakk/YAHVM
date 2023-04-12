@@ -108,7 +108,6 @@ impl Vm {
 
     // let mut index: usize = 0;
     let mut bytes:[u8; 4] = [0, 0, 0, 0];
-    println!("data len: {}", data.len());
     for (i, b) in data.iter().enumerate() {
       bytes[i % 4] = *b;
 
