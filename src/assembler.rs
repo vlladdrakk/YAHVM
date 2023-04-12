@@ -3,96 +3,92 @@ pub mod vm;
 
 use std::collections::HashMap;
 use std::env;
-use std::fs::File;
+use std::fs::{File, self};
 use std::io::{BufRead, BufReader};
-use std::io::prelude::*;
 use std::path::Path;
 use phf::{phf_map};
 use regex::Regex;
 use substring::Substring;
 
-static OPCODES : phf::Map<&'static str, &'static str> = phf_map! {
-  "PRT" => "0000",
-  "SET" => "0001",
-  "ADD" => "0010",
-  "SUB" => "0011",
-  "MUL" => "0100",
-  "DIV" => "0101",
-  "JMP" => "0110",
-  "JNP" => "0111",
-  "EQL" => "1000",
-  "CBP" => "1001",
-  "CLP" => "1010",
+static OPCODES : phf::Map<&'static str, u8> = phf_map! {
+  "PRT" => 0b0000,
+  "SET" => 0b0001,
+  "ADD" => 0b0010,
+  "SUB" => 0b0011,
+  "MUL" => 0b0100,
+  "DIV" => 0b0101,
+  "JMP" => 0b0110,
+  "JNP" => 0b0111,
+  "EQL" => 0b1000,
+  "CBP" => 0b1001,
+  "CLP" => 0b1010,
 };
 
-static VARS : phf::Map<&'static str, &'static str> = phf_map! {
-  "$0" => "0000",
-  "$1" => "0001",
-  "$2" => "0010",
-  "$3" => "0011",
-  "$4" => "0100",
-  "$5" => "0101",
-  "$6" => "0110",
-  "$7" => "0111",
-  "$8" => "1000",
-  "$9" => "1001",
-  "$a" => "10010",
-  "$b" => "1011",
-  "$c" => "1100",
-  "$d" => "1101",
-  "$e" => "1110",
-  "$f" => "1111",
+static VARS : phf::Map<&'static str,u8> = phf_map! {
+  "$0" => 0b0000,
+  "$1" => 0b0001,
+  "$2" => 0b0010,
+  "$3" => 0b0011,
+  "$4" => 0b0100,
+  "$5" => 0b0101,
+  "$6" => 0b0110,
+  "$7" => 0b0111,
+  "$8" => 0b1000,
+  "$9" => 0b1001,
+  "$a" => 0b1010,
+  "$b" => 0b1011,
+  "$c" => 0b1100,
+  "$d" => 0b1101,
+  "$e" => 0b1110,
+  "$f" => 0b1111,
 };
 
-static TYPE : phf::Map<&'static str, &'static str> = phf_map! {
-  "0" => "00",
-  "1" => "01",
-  "2" => "10",
-  "3" => "11",
+static TYPE : phf::Map<&'static str, u8> = phf_map! {
+  "0" => 0b00,
+  "1" => 0b01,
+  "2" => 0b10,
+  "3" => 0b11,
 };
 
 struct Instruction {
-  opcode: String,
-  var: String,
-  ins_type: String,
-  num: String,
+  opcode: u8,
+  var: u8,
+  ins_type: u8,
+  num: u8,
 }
 
 impl Instruction {
   fn default() -> Instruction {
     return Instruction {
-      opcode: String::new(),
-      var: String::new(),
-      ins_type: String::new(),
-      num: String::new(),
+      opcode: 0,
+      var: 0,
+      ins_type: 0,
+      num: 0,
     }
   }
   fn parse_opcode(&mut self, opcode: &str) {
-    self.opcode = String::from(OPCODES[opcode]);
+    self.opcode = OPCODES[opcode];
   }
 
   fn parse_var(&mut self, var: &str) {
-    self.var = String::from(VARS[&var.to_lowercase()]);
+    self.var = VARS[&var.to_lowercase()];
   }
 
   fn parse_type(&mut self, raw_type: &str) {
-    self.ins_type = String::from(TYPE[raw_type]);
+    self.ins_type = TYPE[raw_type];
   }
 
   fn parse_num(&mut self, num: &str) {
-    let mut number : String = String::new();
-
     if num.starts_with('-') {
-      number = String::from("1");
+      self.num = 0b10000000;
+      self.num = self.num | String::from(&num[1..num.len()]).parse::<u8>().unwrap();
+    } else {
+      self.num = num.parse::<u8>().unwrap();
     }
-
-    number.push_str(&format!("{:08b}", num.parse::<i32>().unwrap()));
-
-    self.num = number;
   }
 
   fn parse_num_as_var(&mut self, num: &str) {
-    self.num = format!("0000{}", String::from(VARS[num]));
+    self.num = VARS[num];
   }
 
   fn parse(&mut self, line: String) {
@@ -104,11 +100,27 @@ impl Instruction {
     self.parse_num(parts[3]);
   }
 
-  fn as_binary(&self) -> String {
-    return String::from(format!("{}{}{}{}", self.opcode, self.var, self.ins_type, self.num));
+  fn as_binary(&self) -> u32 {
+    let mut result: u32 = 0;
+    // add opcode
+    result = result | self.opcode as u32;
+    result = result << 4;
+
+    // Add var
+    result = result | self.var as u32;
+    result = result << 2;
+
+    // Add type
+    result = result | self.ins_type as u32;
+    result = result << 8;
+
+    // Add num
+    result = result | self.num as u32;
+
+    return result;
   }
 
-  fn line_to_binary(&mut self, line: String) -> String {
+  fn line_to_binary(&mut self, line: String) -> u32 {
     self.parse(line);
 
     return self.as_binary();
@@ -123,7 +135,6 @@ fn main() {
 }
 
 pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
-  let mut result: String = String::new();
   let mut label_table = HashMap::new();
   let mut current_line: i32 = 0;
   let re = Regex::new(r"\#\w+").unwrap();
@@ -153,18 +164,21 @@ pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
     pre_assembled.push(l);
   }
 
+  let mut bytes = Vec::new();
+
   for line in pre_assembled {
-    result.push_str(&process_line(line));
-    result.push_str("\n");
+    let instruction: u32 = process_line(line);
+
+    for b in instruction.to_be_bytes() {
+      bytes.push(b);
+    }
   }
 
-  let mut file = File::create(output_path)?;
-  file.write_all(result.as_bytes())?;
-  file.sync_all()?;
+  fs::write(output_path, &bytes)?;
   Ok(())
 }
 
-fn process_line(line: String) -> String {
+fn process_line(line: String) -> u32 {
   let mut ins = Instruction::default();
   let opcode = line.split(' ').collect::<Vec<&str>>()[0];
 
@@ -188,7 +202,7 @@ fn process_line(line: String) -> String {
 // PRT $x => Just print the variable
 // PRT num => Directly print a number
 // PRT $x type num => The full version
-fn parse_just_var_or_num(line: String) -> String {
+fn parse_just_var_or_num(line: String) -> u32 {
   let parts: Vec<&str> = line.split(' ').collect();
   let mut ins = Instruction::default();
   ins.parse_opcode(parts[0]);
@@ -213,7 +227,7 @@ fn parse_just_var_or_num(line: String) -> String {
   return ins.line_to_binary(line);
 }
 
-fn parse_just_num(line: String) -> String {
+fn parse_just_num(line: String) -> u32 {
   let parts: Vec<&str> = line.split(' ').collect();
   let mut ins = Instruction::default();
   ins.parse_opcode(parts[0]);
@@ -229,7 +243,7 @@ fn parse_just_num(line: String) -> String {
   return ins.line_to_binary(line);
 }
 
-fn parse_no_type(line: String) -> String {
+fn parse_no_type(line: String) -> u32 {
   let parts: Vec<&str> = line.split(' ').collect();
   let mut ins = Instruction::default();
   ins.parse_opcode(parts[0]);

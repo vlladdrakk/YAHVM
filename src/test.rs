@@ -54,7 +54,7 @@ mod tests {
   #[test]
   fn it_sets() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000010000011")); // SET $0 0 -3
+    vm.instructions.push(0b000100000010000011 as u32); // SET $0 0 -3
 
     vm.exec();
 
@@ -64,8 +64,8 @@ mod tests {
   #[test]
   fn it_adds() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
-    vm.instructions.push(String::from("001000000000000010")); // ADD $0 0 2
+    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
+    vm.instructions.push(0b001000000000000010 as u32); // ADD $0 0 2
 
     vm.exec();
 
@@ -75,8 +75,8 @@ mod tests {
   #[test]
   fn it_prints() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
-    vm.instructions.push(String::from("000000001000000000")); // PRT $0 2 0
+    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
+    vm.instructions.push(0b000000001000000000 as u32); // PRT $0 2 0
 
     vm.exec();
 
@@ -86,8 +86,8 @@ mod tests {
   #[test]
   fn it_subtracts() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000000000001")); // SET $0 0 1
-    vm.instructions.push(String::from("001100000000000010")); // SUB $0 0 2
+    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
+    vm.instructions.push(0b001100000000000010 as u32); // SUB $0 0 2
 
     vm.exec();
 
@@ -97,8 +97,8 @@ mod tests {
   #[test]
   fn it_multiplies() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
-    vm.instructions.push(String::from("010000000000000010")); // MUL $0 0 2
+    vm.instructions.push(0b000100000000000010 as u32); // SET $0 0 2
+    vm.instructions.push(0b010000000000000010 as u32); // MUL $0 0 2
 
     vm.exec();
 
@@ -108,8 +108,8 @@ mod tests {
   #[test]
   fn it_divides() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(String::from("000100000000000010")); // SET $0 0 2
-    vm.instructions.push(String::from("010100000000000010")); // DIV $0 0 2
+    vm.instructions.push(0b000100000000000010 as u32); // SET $0 0 2
+    vm.instructions.push(0b010100000000000010 as u32); // DIV $0 0 2
 
     vm.exec();
 
@@ -120,27 +120,27 @@ mod tests {
   fn it_jumps() {
     let mut vm = vm::Vm::new();
 
-    vm.load_bin("test/jump_test.bin");
+    compile("test/jump_test.asm", "jump_test.bin");
+    vm.load_bin("jump_test.bin");
     vm.exec();
 
-    assert_eq!(vm.registers[0], 0);
+    assert_eq!(vm.registers[0], 11);
+
+    fs::remove_file("jump_test.bin").expect("unable to remove");
   }
 
   #[test]
   fn it_supports_print_shortform() {
     let mut vm = vm::Vm::new();
 
-    match run("test/print_test.asm", "out.bin") {
-      Ok(_) => {},
-      Err(e) => {
-        println!("Failed to compile: {e}");
-      }
-    }
+    compile("test/print_test.asm", "print_test.bin");
 
-    vm.load_bin("out.bin");
+    vm.load_bin("print_test.bin");
     vm.exec();
 
     assert_eq!(vm.output, "output: 12");
+
+    fs::remove_file("print_test.bin").expect("unable to remove");
   }
 
   #[test]
@@ -158,7 +158,7 @@ mod tests {
   }
 
   #[test]
-  fn it_does_pabels() {
+  fn it_does_labels() {
     let mut vm = vm::Vm::new();
     compile("test/label_test.asm", "label_test.bin");
     vm.load_bin("label_test.bin");
