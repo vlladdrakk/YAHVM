@@ -16,7 +16,7 @@ const TYPE_MASK: u32   = 0b000000001100000000;
 const NUM_MASK: u32    = 0b000000000011111111;
 
 fn get_opcode(instruction: u32) -> u8 {
-  return ((instruction & OPCODE_MASK)  >> 14) as u8;
+  ((instruction & OPCODE_MASK)  >> 14) as u8
 }
 
 #[test]
@@ -27,7 +27,7 @@ fn test_get_opcode() {
 }
 
 fn get_var(instruction: u32) -> u8 {
-  return ((instruction & VAR_MASK)  >> 10) as u8;
+  ((instruction & VAR_MASK)  >> 10) as u8
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn test_get_var() {
 }
 
 fn get_type(instruction: u32) -> u8 {
-  return ((instruction & TYPE_MASK)  >> 8) as u8;
+  ((instruction & TYPE_MASK)  >> 8) as u8
 }
 
 #[test]
@@ -53,15 +53,15 @@ fn get_num(instruction: u32) -> i8 {
   let mut unsigned_num = (instruction & NUM_MASK) as u8;
 
   if unsigned_num & 0b10000000 == 0b10000000 {
-    unsigned_num = unsigned_num & 0b01111111;
-    return (unsigned_num as i8) * -1
+    unsigned_num &= 0b01111111;
+    return -(unsigned_num as i8)
   }
 
-  return unsigned_num as i8;
+  unsigned_num as i8
 }
 
 fn get_unum(instruction: u32) -> u8 {
-  return (instruction & NUM_MASK) as u8;
+  (instruction & NUM_MASK) as u8
 }
 
 #[test]
@@ -164,7 +164,7 @@ impl Vm {
       return None;
     }
 
-    return Some(self.instructions[self.pc]);
+    Some(self.instructions[self.pc])
   }
 
   fn prt(&mut self, instruction: u32) {
@@ -174,13 +174,13 @@ impl Vm {
       0b00 => {
         let num = get_num(instruction);
         println!("output: {num}");
-        self.output = String::from(format!("output: {num}"));
+        self.output = format!("output: {num}");
       },
       0b10 => {
         let var = get_var(instruction);
         let index = var as usize;
         println!("output: {}", self.registers[index]);
-        self.output = String::from(format!("output: {}", self.registers[index]));
+        self.output = format!("output: {}", self.registers[index]);
       },
       _ => {}
     }
@@ -202,7 +202,7 @@ impl Vm {
     let num = get_num(instruction);
 
     if ins_type == 0b01 {
-      if num > 15 || num < 0 {
+      if !(0..=15).contains(&num) {
         panic!("Register index out of bounds");
       }
 
@@ -242,7 +242,7 @@ impl Vm {
         panic!("Register index out of bounds");
       }
 
-      self.registers[index] = self.registers[index] - self.registers[num as usize];
+      self.registers[index] -= self.registers[num as usize];
       return;
     }
 

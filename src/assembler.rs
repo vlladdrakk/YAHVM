@@ -59,7 +59,7 @@ struct Instruction {
 
 impl Instruction {
   fn default() -> Instruction {
-    return Instruction {
+    Instruction {
       opcode: 0,
       var: 0,
       ins_type: 0,
@@ -81,7 +81,7 @@ impl Instruction {
   fn parse_num(&mut self, num: &str) {
     if num.starts_with('-') {
       self.num = 0b10000000;
-      self.num = self.num | String::from(&num[1..num.len()]).parse::<u8>().unwrap();
+      self.num |= String::from(&num[1..num.len()]).parse::<u8>().unwrap();
     } else {
       self.num = num.parse::<u8>().unwrap();
     }
@@ -103,27 +103,27 @@ impl Instruction {
   fn as_binary(&self) -> u32 {
     let mut result: u32 = 0;
     // add opcode
-    result = result | self.opcode as u32;
-    result = result << 4;
+    result |= self.opcode as u32;
+    result <<= 4;
 
     // Add var
-    result = result | self.var as u32;
-    result = result << 2;
+    result |= self.var as u32;
+    result <<= 2;
 
     // Add type
-    result = result | self.ins_type as u32;
-    result = result << 8;
+    result |= self.ins_type as u32;
+    result <<= 8;
 
     // Add num
-    result = result | self.num as u32;
+    result |= self.num as u32;
 
-    return result;
+    result
   }
 
   fn line_to_binary(&mut self, line: String) -> u32 {
     self.parse(line);
 
-    return self.as_binary();
+    self.as_binary()
   }
 }
 
@@ -147,7 +147,7 @@ pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
   for line in &lines {
     if line.starts_with('#') {
       label_table.insert(line, current_line);
-    } else if !line.starts_with(';') && line.len() > 0 {
+    } else if !line.starts_with(';') && !line.is_empty() {
       pre_replacement.push(line.to_string());
       current_line += 1;
     }
@@ -155,7 +155,7 @@ pub fn run(file_path: &str, output_path: &str) -> std::io::Result<()> {
 
   for line in &pre_replacement {
     let mut l: String = line.clone();
-    for mat in re.find_iter(&line) {
+    for mat in re.find_iter(line) {
       let label: String = line.substring(mat.start(), mat.end()).to_string();
       let line_num = label_table.get(&label).unwrap() + 1;
 
@@ -183,7 +183,7 @@ fn process_line(line: String) -> u32 {
   let opcode = line.split(' ').collect::<Vec<&str>>()[0];
 
   // Handle all possibilities of short forms
-  return match opcode {
+  match opcode {
     "PRT" => parse_just_var_or_num(line),
     "SET" => parse_no_type(line),
     "JMP" => parse_just_num(line),
@@ -208,7 +208,7 @@ fn parse_just_var_or_num(line: String) -> u32 {
   ins.parse_opcode(parts[0]);
 
   if parts.len() == 2 {
-    if parts[1].starts_with("$") {
+    if parts[1].starts_with('$') {
       ins.parse_var(parts[1]);
       ins.parse_type("2");
       ins.parse_num("0");
@@ -224,7 +224,7 @@ fn parse_just_var_or_num(line: String) -> u32 {
   }
 
   // Default
-  return ins.line_to_binary(line);
+  ins.line_to_binary(line)
 }
 
 fn parse_just_num(line: String) -> u32 {
@@ -240,7 +240,7 @@ fn parse_just_num(line: String) -> u32 {
     return ins.as_binary();
   }
 
-  return ins.line_to_binary(line);
+  ins.line_to_binary(line)
 }
 
 fn parse_no_type(line: String) -> u32 {
@@ -252,7 +252,7 @@ fn parse_no_type(line: String) -> u32 {
     ins.parse_var(parts[1]);
     ins.parse_type("0");
 
-    if parts[2].starts_with("$") {
+    if parts[2].starts_with('$') {
       ins.parse_type("1");
       ins.parse_num_as_var(parts[2]);
     } else {
@@ -263,7 +263,7 @@ fn parse_no_type(line: String) -> u32 {
     return ins.as_binary();
   }
 
-  return ins.line_to_binary(line);
+  ins.line_to_binary(line)
 }
 
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {

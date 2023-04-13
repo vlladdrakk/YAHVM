@@ -23,7 +23,7 @@ mod tests {
         String::new()
       },
       Ok(val) => {
-        String::from(val)
+        val
       }
     };
 
@@ -34,7 +34,7 @@ mod tests {
       },
       Ok(val) => {
         println!("result: {val}");
-        String::from(val)
+        val
       }
     };
 
@@ -54,7 +54,7 @@ mod tests {
   #[test]
   fn it_sets() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000010000011 as u32); // SET $0 0 -3
+    vm.instructions.push(0b000100000010000011_u32); // SET $0 0 -3
 
     vm.exec();
 
@@ -64,8 +64,8 @@ mod tests {
   #[test]
   fn it_adds() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
-    vm.instructions.push(0b001000000000000010 as u32); // ADD $0 0 2
+    vm.instructions.push(0b000100000000000001_u32); // SET $0 0 1
+    vm.instructions.push(0b001000000000000010_u32); // ADD $0 0 2
 
     vm.exec();
 
@@ -75,8 +75,8 @@ mod tests {
   #[test]
   fn it_prints() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
-    vm.instructions.push(0b000000001000000000 as u32); // PRT $0 2 0
+    vm.instructions.push(0b000100000000000001_u32); // SET $0 0 1
+    vm.instructions.push(0b000000001000000000_u32); // PRT $0 2 0
 
     vm.exec();
 
@@ -86,8 +86,8 @@ mod tests {
   #[test]
   fn it_subtracts() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000000000001 as u32); // SET $0 0 1
-    vm.instructions.push(0b001100000000000010 as u32); // SUB $0 0 2
+    vm.instructions.push(0b000100000000000001_u32); // SET $0 0 1
+    vm.instructions.push(0b001100000000000010_u32); // SUB $0 0 2
 
     vm.exec();
 
@@ -97,8 +97,8 @@ mod tests {
   #[test]
   fn it_multiplies() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000000000010 as u32); // SET $0 0 2
-    vm.instructions.push(0b010000000000000010 as u32); // MUL $0 0 2
+    vm.instructions.push(0b000100000000000010_u32); // SET $0 0 2
+    vm.instructions.push(0b010000000000000010_u32); // MUL $0 0 2
 
     vm.exec();
 
@@ -108,8 +108,8 @@ mod tests {
   #[test]
   fn it_divides() {
     let mut vm = vm::Vm::new();
-    vm.instructions.push(0b000100000000000010 as u32); // SET $0 0 2
-    vm.instructions.push(0b010100000000000010 as u32); // DIV $0 0 2
+    vm.instructions.push(0b000100000000000010_u32); // SET $0 0 2
+    vm.instructions.push(0b010100000000000010_u32); // DIV $0 0 2
 
     vm.exec();
 
