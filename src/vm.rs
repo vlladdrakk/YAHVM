@@ -72,6 +72,12 @@ fn test_get_num() {
   assert_eq!(get_num(0b000000000010000001), -1);
 }
 
+impl Default for Vm {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 impl Vm {
   pub fn new() -> Self {
     Self {
